@@ -909,6 +909,95 @@ Feature: TestCase
     When I run Psalm with dead code detection
     Then I see no errors
 
+  Scenario: Test methods marked with #[Test] in a trait are not marked as unused when the consuming class does not import the Test attribute
+    Given I have the following code in "MyTestTrait.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\Attributes\Test;
+      trait MyTestTrait {
+        #[Test]
+        public function itDoesSomething(): void {}
+      }
+      """
+    And I have the following code in "code.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\TestCase;
+      final class MyTestCase extends TestCase {
+        use MyTestTrait;
+      }
+      """
+    When I run Psalm with dead code detection
+    Then I see no errors
+
+  Scenario: Test methods marked with a partially-imported #[Attributes\Test] in a trait are not marked as unused when the consuming class does not import the namespace
+    Given I have the following code in "MyTestTrait.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\Attributes;
+      trait MyTestTrait {
+        #[Attributes\Test]
+        public function itDoesSomething(): void {}
+      }
+      """
+    And I have the following code in "code.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\TestCase;
+      final class MyTestCase extends TestCase {
+        use MyTestTrait;
+      }
+      """
+    When I run Psalm with dead code detection
+    Then I see no errors
+
+  Scenario: Test methods marked with an aliased #[Test] attribute in a trait are not marked as unused when the consuming class does not import the alias
+    Given I have the following code in "MyTestTrait.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\Attributes\Test as PHPUnitTest;
+      trait MyTestTrait {
+        #[PHPUnitTest]
+        public function itDoesSomething(): void {}
+      }
+      """
+    And I have the following code in "code.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\TestCase;
+      final class MyTestCase extends TestCase {
+        use MyTestTrait;
+      }
+      """
+    When I run Psalm with dead code detection
+    Then I see no errors
+
+  Scenario: Test methods marked with a fully-qualified #[Test] attribute are not marked as unused
+    Given I have the following code in "BaseTestCase.php"
+      """
+      <?php
+      namespace NS;
+      use PHPUnit\Framework\TestCase;
+      abstract class BaseTestCase extends TestCase {}
+      """
+    And I have the following code in "code.php"
+      """
+      <?php
+      namespace NS;
+      final class MyTestCase extends BaseTestCase {
+        #[\PHPUnit\Framework\Attributes\Test]
+        public function itDoesSomething(): void {}
+      }
+      """
+    When I run Psalm with dead code detection
+    Then I see no errors
+
   Scenario: Inherited test methods are not marked as unused
     Given I have the following code
       """

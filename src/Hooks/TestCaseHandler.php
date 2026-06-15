@@ -159,7 +159,9 @@ final class TestCaseHandler implements
                 continue;
             }
 
-            $specials = self::getSpecials($stmt_method, $aliases);
+            // Use the declaring class's aliases so trait-declared attributes resolve via the trait's imports.
+            $method_aliases = $declaring_class_storage->aliases ?? $aliases;
+            $specials = self::getSpecials($stmt_method, $method_aliases);
 
             $is_test = 0 === strpos($method_name_lc, 'test') || isset($specials['test']);
             if (!$is_test) {
@@ -561,7 +563,8 @@ final class TestCaseHandler implements
         $attributesInGroupMatchingRequestedAttributeName = static fn(AttributeGroup $group): array => array_filter(
             $group->attrs,
             static fn(Attribute $attribute): bool => $attributeClass === Type::getFQCLNFromString(
-                $attribute->name->toString(),
+                // toCodeString() keeps the leading backslash toString() strips, so fully-qualified attributes resolve.
+                $attribute->name->toCodeString(),
                 $aliases,
             ),
         );
