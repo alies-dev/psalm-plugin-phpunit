@@ -1,6 +1,6 @@
 # psalm-plugin-phpunit
 
-A [Psalm](https://github.com/vimeo/psalm) plugin that teaches Psalm about PHPUnit (requires Psalm v4+).
+A [Psalm](https://github.com/vimeo/psalm) plugin for PHPUnit (requires Psalm v4+).
 
 ## What it does
 
